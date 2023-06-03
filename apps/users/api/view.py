@@ -3,7 +3,7 @@ from rest_framework import status
 # from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from apps.users.models import User
-from apps.users.api.serializers import UserSerializer
+from apps.users.api.serializers import UserSerializer, UserListSerializer
 
 # class UserAPIView(APIView):
     
@@ -19,7 +19,7 @@ def user_api_view(request):
     if request.method == 'GET':     
         #queryset
         users = User.objects.all().values("id","name","email","password")
-        user_serializer = UserSerializer(users, many=True)
+        user_serializer = UserListSerializer(users, many=True)
         
         return Response(user_serializer.data, status = status.HTTP_200_OK)
     
