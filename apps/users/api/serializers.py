@@ -20,8 +20,6 @@ class TestUserSerializer(serializers.Serializer):
     def validate_email(self, value): 
         if value == '':
             raise serializers.ValidationError('Tiene que poner un correo valido')
-        if self.validate_name(self.context['name']) in value:
-            raise serializers.ValidationError('El email no puede contener el nombre')
         return value 
     
     def validate(self, data): 
@@ -30,3 +28,9 @@ class TestUserSerializer(serializers.Serializer):
     def create(self, validate_data):
         print(validate_data)
         return User.objects.create(**validate_data)
+    
+    def update(self, instance, validate_data):
+        instance.name = validate_data.get('name', instance.name)
+        instance.email = validate_data.get('email', instance.email)
+        instance.save()
+        return instance

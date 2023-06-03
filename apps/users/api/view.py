@@ -20,17 +20,6 @@ def user_api_view(request):
         #queryset
         users = User.objects.all()
         user_serializer = UserSerializer(users, many=True)
-        test_data = {
-            "name":"testes",
-            "email":"test@gmail.com"
-        }
-        
-        test_user = TestUserSerializer(data=test_data, context=test_data)
-        
-        if test_user.is_valid():
-            test_user.save()
-        else:
-            print(test_user.errors)
         
         return Response(user_serializer.data, status = status.HTTP_200_OK)
     
@@ -60,7 +49,7 @@ def user_detail_view(request, pk=None):
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         #update
         elif request.method == "PUT":  
-            user_serializer = UserSerializer(user, data = request.data)
+            user_serializer = TestUserSerializer(user, data = request.data)
             if user_serializer.is_valid():
                 user_serializer.save()
                 return Response(user_serializer.data, status=status.HTTP_200_OK)
