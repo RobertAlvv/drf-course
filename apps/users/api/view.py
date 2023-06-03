@@ -3,7 +3,7 @@ from rest_framework import status
 # from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from apps.users.models import User
-from apps.users.api.serializers import UserSerializer, TestUserSerializer 
+from apps.users.api.serializers import UserSerializer
 
 # class UserAPIView(APIView):
     
@@ -18,7 +18,7 @@ def user_api_view(request):
     #list
     if request.method == 'GET':     
         #queryset
-        users = User.objects.all()
+        users = User.objects.all().values("id","name","email","password")
         user_serializer = UserSerializer(users, many=True)
         
         return Response(user_serializer.data, status = status.HTTP_200_OK)
@@ -38,7 +38,7 @@ def user_detail_view(request, pk=None):
     # if pk is not None:
     
     #Queryset
-    user = User.objects.filter(id=pk).first()
+    user = User.objects.values("id","name","email","password").filter(id=pk).first()
     
     #Validation
     if user:
@@ -49,7 +49,7 @@ def user_detail_view(request, pk=None):
             return Response(user_serializer.data, status=status.HTTP_200_OK)
         #update
         elif request.method == "PUT":  
-            user_serializer = TestUserSerializer(user, data = request.data)
+            user_serializer = UserSerializer(user, data = request.data)
             if user_serializer.is_valid():
                 user_serializer.save()
                 return Response(user_serializer.data, status=status.HTTP_200_OK)
