@@ -1,12 +1,11 @@
-from apps.base.serializers import BaseGenericAPIView
+from apps.base.views import BaseGenericListAPIView
 from apps.products.api.serializers.general_serializers import MeasureUnitSerializer, CategoryProductSerializer, IndicatorSerializer
-from apps.products.models import MeasureUnit, CategoryProduct, Indicator
 
-class MeasureUnitListAPIView(BaseGenericAPIView):
+class MeasureUnitListAPIView(BaseGenericListAPIView):
     serializer_class = MeasureUnitSerializer
     
-class CategoryProductListAPIView(BaseGenericAPIView):
+class CategoryProductListAPIView(BaseGenericListAPIView):
     serializer_class = CategoryProductSerializer
     
-class IndicatorListAPIView(BaseGenericAPIView):
+class IndicatorListAPIView(BaseGenericListAPIView):
     serializer_class = IndicatorSerializer
