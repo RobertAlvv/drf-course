@@ -2,15 +2,11 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 
-from apps.products.api.serializers.product_serializers import ProductSerializer
-from apps.base.views import BaseGenericListAPIView
-
-class ProductListAPIView(BaseGenericListAPIView):
-    serializer_class = ProductSerializer
+from apps.products.api.serializers.product_serializers import ProductSerializer 
     
-class ProductCreateAPIView(generics.CreateAPIView):
+class ProductListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
-    
+    queryset = ProductSerializer.Meta.model.objects.filter(state=True)
     
     def post(self, request):
         serializer = self.get_serializer()
@@ -25,8 +21,6 @@ class ProductRetrieveAPIView(generics.RetrieveAPIView):
     
     def get_queryset(self):
        return self.get_serializer().Meta.model.objects.filter(state = True)
-   
-    # def get(self, request, pk=None):
     
 class ProductDestroyAPIView(generics.DestroyAPIView):
     serializer_class = ProductSerializer
