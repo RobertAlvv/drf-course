@@ -1,10 +1,10 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-
+from apps.users.authentication_mixins import Authentication
 from apps.products.api.serializers.product_serializers import ProductSerializer
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(Authentication, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     
     def get_queryset(self, pk=None):
