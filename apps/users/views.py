@@ -10,10 +10,10 @@ from apps.users.api.serializers import UserTokenSerializer
 
 class UserToken(APIView):
     def get(self, request, *args, **kwargs):
-        username = request.GET('username')
         try:
-            user_token = Token.objects.get(user = UserTokenSerializer().Meta.model.objects.filter(username = username).first())
-            return Response({'token': user_token.key})
+            user_token, _ = Token.objects.get_or_create(user = self.user)
+            user = UserTokenSerializer(self.user)
+            return Response({'token': user_token.key, 'user': user.data})
         except:
             return Response({"error": "Credenciales incorrectas"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -34,7 +34,7 @@ class Login(ObtainAuthToken):
                         }, 
                         status= status.HTTP_201_CREATED)
                 else:
-                    all_sessions = Session.objects.filter(expire_date_gte=datetime.now())
+                    all_sessions = Session.objects.filter(expire_date__gte=datetime.now())
                     if all_sessions.exists():
                         for session in all_sessions:
                             session_data = session.get_decode()
@@ -45,7 +45,7 @@ class Login(ObtainAuthToken):
                     return Response({
                         "token": token.key, 
                         "user": user_serializer.data,
-                        "message": "Iniocion de sesion exitoso"
+                        "message": "Inicio de sesion exitoso"
                         }, 
                         status= status.HTTP_201_CREATED)
                     
