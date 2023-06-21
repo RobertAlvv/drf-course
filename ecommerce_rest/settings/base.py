@@ -37,18 +37,22 @@ THIRD_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'simple_history',
     'drf_yasg',
 ]
 
 INSTALLED_APPS = BASE_APPS + LOCAL_APPS + THIRD_APPS
 
-TOKEN_EXPIRED_AFTER_SECONDS = 120
+# TOKEN_EXPIRED_AFTER_SECONDS = 120
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'apps.users.authentication_mixins.Authentication',
-    ]
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 MIDDLEWARE = [

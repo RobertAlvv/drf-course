@@ -1,86 +1,45 @@
-from django.contrib.sessions.models import Session
+from django.contrib.auth import authenticate
 
 from rest_framework.response import Response
-from datetime import datetime
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from apps.users.api.serializers import UserTokenSerializer
+from rest_framework.generics import GenericAPIView
 
-class UserToken(APIView):
-    def get(self, request, *args, **kwargs):
-        try:
-            user_token, _ = Token.objects.get_or_create(user = self.user)
-            user = UserTokenSerializer(self.user)
-            return Response({'token': user_token.key, 'user': user.data})
-        except:
-            return Response({"error": "Credenciales incorrectas"}, status=status.HTTP_400_BAD_REQUEST)
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-class Login(ObtainAuthToken):
-
-    def post(self, request, *args, **kwargs):
-        login_serializer = self.serializer_class(data = request.data, context = {'request': request})
-        if login_serializer.is_valid():
-            user = login_serializer.validated_data["user"]
-            if user.is_active:
-                token, created = Token.objects.get_or_create(user = user)
-                user_serializer = UserTokenSerializer(user, many = False)
-                if created:    
-                    return Response({
-                        "token": token.key, 
-                        "user": user_serializer.data,
-                        "message": "Iniocion de sesion exitoso"
-                        }, 
-                        status= status.HTTP_201_CREATED)
-                else:
-                    all_sessions = Session.objects.filter(expire_date__gte=datetime.now())
-                    if all_sessions.exists():
-                        for session in all_sessions:
-                            session_data = session.get_decode()
-                            if user.id == int(session_data.get("_auth_user_id")):
-                                session.delete()
-                    token.delete()
-                    token = Token.objects.create(user = user)
-                    return Response({
-                        "token": token.key, 
-                        "user": user_serializer.data,
-                        "message": "Inicio de sesion exitoso"
-                        }, 
-                        status= status.HTTP_201_CREATED)
-                    
-            else:
-                return Response({"error": "Este usuario no puede iniciar sesion"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response({"error": "Nombre o contraseña incorrecta."}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-class Logout(APIView):
+from apps.users.api.serializers import CustomTokenObtainPairSerializer, CustomUserSerializer
+from apps.users.models import User
+class Login(TokenObtainPairView):
+    serialzer_class = CustomTokenObtainPairSerializer
     
-    def get(self, request, *args, **kwargs):
-        try:
-            token = request.GET.get('token')
-            token = Token.objects.filter(key = token).first()
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username", "")
+        password = request.data.get("password", "")
         
-            if token:
-                user = token.user
-                all_sessions = Session.objects.filter(expire_date_gte=datetime.now())
-                if all_sessions.exists():
-                    for session in all_sessions:
-                            session_data = session.get_decode()
-                            if user.id == int(session_data.get("_auth_user_id")):
-                                session.delete()
-                
-                token.delete()
-                
-                session_message = 'Sesiones de usuario eliminadas'
-                token_message = 'Token eliminado'
-                return Response({"token_message": token_message, "session_message": session_message}, status=status.HTTP_200_OK)
+        user = authenticate(
+            username = username,
+            password = password
+        )
         
-            return Response({"error": "No se ha encontrado un usuario con estas credenciales"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        except:
-            return Response({"error": "No se ha encontrado token en la peticion"}, status=status.HTTP_409_CONFLICT)
-
-            
+        if user:
+            login_serializer = self.serialzer_class(data=request.data)
+            if login_serializer.is_valid():
+                user_serializer = CustomUserSerializer(user)
+                return Response({
+                    "token": login_serializer.validate_data.get('access'),
+                    "refresh_token": login_serializer.validate_data.get('refresh'),
+                    "user": user_serializer.data,
+                    "message": "Inicio de sesion exitoso"
+                }, status=status.HTTP_200_OK)
+        return Response({"error": "Contraseña o nombre de usuario incorrecto"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class Logout(GenericAPIView):
+    
+    def post(self, request, *args, **kwargs):
+        user = User.objects.filter(id=request.data.get('user', ''))
+        if user.exists():
+            RefreshToken.for_user(user.first())
+            return  Response({"message": "sesion cerrada correctamente"}, status= status.HTTP_200_OK)
+        return Response({"error": "No existe este usuario"}, status=status.HTTP_400_BAD_REQUEST)
         
