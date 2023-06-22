@@ -1,9 +1,11 @@
 def validate_files(data, field, update = False):
-    data._mutable = True
+    
+    data = data.copy()
+    
     if update:
         if type(data[field]) == str:
-            del data[field]
-    else:    
-        data[field] = None if type(data[field]) == str else data[field]
-    data._mutable = False
+            data.__delitem__(field)
+    else:
+        if type(data[field]) == str:
+            data.__setitem__(field, None)
     return data
