@@ -5,6 +5,8 @@ from rest_framework import permissions
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.conf import settings
+from django.views.static import serve
 
 from rest_framework_simplejwt.views import(
     TokenObtainPairView,
@@ -37,4 +39,11 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
     path('users/', include('apps.users.api.routers')),
     path('products/', include('apps.products.api.routers')),
+]
+
+
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve,{
+        'document_root': settings.MEDIA_ROOT,
+    }),
 ]
