@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.expense_manager.models import Supplier
+from apps.expense_manager.models import *
 
 class SupplierSerializer(serializers.ModelSerializer):
     
@@ -11,4 +11,18 @@ class SupplierSerializer(serializers.ModelSerializer):
     def save(self):
         new_object = Supplier(**self.validated_data)
         return new_object.save()
+    
+class VoucherSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Voucher
+        fields = ('id', 'name')
+    
+class PaymentTypeSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = PaymentType
+        fields = ('id', 'name')
+        
+
         

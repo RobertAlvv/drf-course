@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from apps.expense_manager.models import Supplier
+from apps.products.models import Product
+from apps.expense_manager.models import *
 from apps.expense_manager.api.serializers.expense_serializer import *
 from apps.expense_manager.api.serializers.general_serializer import *
 
@@ -34,4 +35,22 @@ class ExpenseViewset(GenericViewSet):
             supplier_serializer.save()
             Response(supplier_serializer.data, status=status.HTTP_200_OK)
         Response(supplier_serializer.error_messages, status=status.HTTP_400_BAD_REQUEST )
-                
+    
+    
+    @action(methods=["get"], detail=False)
+    def get_vouchers(self, request):
+        data = Voucher.objects.filter(state=True).order_by("id")
+        data = VoucherSerializer(data=data, many=True).data
+        return Response(data)
+
+    @action(methods=["get"], detail=False)
+    def get_payment_type(self, request):
+        data = PaymentType.objects.filter(state=True).order_by("id")
+        data = PaymentTypeSerializer(data=data, many=True).data
+        return Response(data)
+    
+    @action(methods=["get"], detail=False)
+    def get_product(self, request):
+        data = Product.objects.filter(state=True).order_by("id")
+        data = ProductSerializer(data=data, many=True).data
+        return Response(data)

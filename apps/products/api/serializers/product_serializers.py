@@ -38,3 +38,11 @@ class ProductSerializer(serializers.ModelSerializer):
             'measure_unit': instance.measure_unit.description,
             'category_product': instance.category_product.description,
         }
+
+class ProductRetrieveSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Product
+        exclude = ('state','created_date', 'modified_date', 'deleted_date',)
+        
+
