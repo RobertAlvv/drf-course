@@ -37,6 +37,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'image': '' if not instance.image.url else instance.image,
             'measure_unit': instance.measure_unit.description,
             'category_product': instance.category_product.description,
+            'stock': instance.stock.get("quantity__sum") if instance.stock.get("quantity__sum") is not None else 0,
         }
 
 class ProductRetrieveSerializer(serializers.ModelSerializer):

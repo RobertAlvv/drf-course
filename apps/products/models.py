@@ -45,12 +45,24 @@ class Product(BaseModel):
     image = models.ImageField('Imagen del Producto', upload_to='products/', blank=True, null=True)
     measure_unit = models.ForeignKey(MeasureUnit, on_delete=models.CASCADE, verbose_name='Unidad de medida', null=True)
     category_product = models.ForeignKey(CategoryProduct, on_delete=models.CASCADE, verbose_name='Categoria de producto', null=True)
-    
-    def __str__(self):
-        return self.name
 
     class Meta:
         db_table = ''
         managed = True
         verbose_name = 'Producto'
         verbose_name_plural = 'Productos'
+        
+    def __str__(self):
+        return self.name
+    
+    @property
+    def stock(self):
+        from django.db.models import Sum
+        from apps.expense_manager.models import Expense
+        
+        expense = Expense.objects.filter(
+            product = self,
+            state=True
+        ).aggregate(Sum('quantity'))
+        
+        return expense
