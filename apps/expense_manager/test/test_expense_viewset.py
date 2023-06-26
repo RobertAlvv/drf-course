@@ -1,6 +1,7 @@
 from rest_framework import status
 from tests.test_setup import TestSetUp
 from apps.expense_manager.test.factories.expense_factory import SupplierFactory
+from apps.expense_manager.models import Supplier
 
 
 class ExpenseTestCase(TestSetUp):
@@ -33,3 +34,16 @@ class ExpenseTestCase(TestSetUp):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotEqual(supplier.ruc, "12312341")
         self.assertEqual(response.data["error"], "No existe el suplidor")
+        
+    def test_new_supplier(self):
+        supplier = SupplierFactory().build_supplier_JSON()
+        
+        response = self.client.post(
+            self.url + "/new_sup lier/",
+            supplier,
+            format="json"
+        )
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Supplier.object.all().count(), 1)
+        self.assertEqual(response.data['supplier']['ruc'], supplier['ruc'])
